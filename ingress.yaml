@@ -3,8 +3,6 @@ kind: Ingress
 metadata:
   name: task-app-ingress
   namespace: task-app
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
   rules:
   - http:
