@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: task-app-monitor
+  namespace: task-app
+spec:
+  selector:
+    matchLabels:
+      app: task-app-monitor
+  template:
+    metadata:
+      labels:
+        app: task-app-monitor
+    spec:
+      containers:
+        - name: task-app
+          image: go-test-app:latest
+          imagePullPolicy: Never
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          command: ["/bin/sh", "-c", "mkdir -p /app/logs && while true; do echo \"Monitoring node $NODE_NAME\" >> /app/logs/monitor.log; sleep 60; done"]
+          volumeMounts:
+            - name: log-storage
+              mountPath: /app/logs
+      volumes:
+        - name: log-storage
+          hostPath:
+            path: /var/log/task-app
+            type: DirectoryOrCreate

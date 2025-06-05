@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: task-app-stateful
+  namespace: task-app
+spec:
+  serviceName: task-app-stateful
+  replicas: 2
+  selector:
+    matchLabels:
+      app: task-app-stateful
+  template:
+    metadata:
+      labels:
+        app: task-app-stateful
+    spec:
+      containers:
+      - name: task-app
+        image: go-test-app:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: log-storage
+          mountPath: /app/logs
+  volumeClaimTemplates:
+  - metadata:
+      name: log-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: task-app-stateful
+  namespace: task-app
+spec:
+  selector:
+    app: task-app-stateful
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+  clusterIP: None
