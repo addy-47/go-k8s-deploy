@@ -7,6 +7,7 @@ spec:
   rules:
   - http:
       paths:
+      # Direct tasks route (no rewrite)
       - path: /tasks
         pathType: Prefix
         backend:
@@ -14,7 +15,20 @@ spec:
             name: task-app-deployment
             port:
               number: 80
-      - path: /stateful/(.*)
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: task-app-stateful-ingress
+  namespace: task-app
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  - http:
+      paths:
+      # Stateful routes with rewrite
+      - path: /stateful(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
           service:

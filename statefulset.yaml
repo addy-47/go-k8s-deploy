@@ -4,7 +4,7 @@ metadata:
   name: task-app-stateful
   namespace: task-app
 spec:
-  serviceName: task-app-stateful
+  serviceName: task-app-stateful-headless  # Keep headless for StatefulSet
   replicas: 2
   selector:
     matchLabels:
@@ -32,6 +32,22 @@ spec:
         requests:
           storage: 1Gi
 ---
+# Headless service for StatefulSet (for pod-to-pod communication)
+apiVersion: v1
+kind: Service
+metadata:
+  name: task-app-stateful-headless
+  namespace: task-app
+spec:
+  selector:
+    app: task-app-stateful
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+  clusterIP: None
+---
+# Regular ClusterIP service for Ingress routing
 apiVersion: v1
 kind: Service
 metadata:
@@ -44,4 +60,4 @@ spec:
   - protocol: TCP
     port: 8080
     targetPort: 8080
-  clusterIP: None
+  type: ClusterIP  # This will get a regular ClusterIP
